@@ -5,34 +5,30 @@
 /// </summary>
 public class Guess : IView
 {
-    private readonly int _maxNum;
-    private readonly int _maxTries;
+    
     private readonly IView _printer;
+    private readonly ISettings _settings;
 
     /// <summary>
     /// Ну вроде принцип инверсии зависимости соблюден с использованием абстракции в виде класса для вывода на консоль
     /// можно заменить на любой другой без переписывания кода
     /// </summary>
-    /// <param name="maxTries">Колическтво попыток</param>
     /// <param name="printer">Вывод текстовых данных</param>
-    /// <param name="maxNum"> Максимальное загадываемое число, по умолчанию 100</param>
-    public Guess(int maxTries, IView printer, int maxNum = 100)
+    /// <param name="settings">Настройки</param>
+    public Guess(IView printer, ISettings settings)
     {
-        _maxNum = maxNum;
-        _maxTries = maxTries;
+        _settings = settings;
         _printer = printer;
     }
 
     /// <summary>
-    /// Вся логика скрыта в приватном методе, принцип единственной ответственности, наверно)
+    /// Вся логика скрыта
     /// </summary>
     private void HumanGuess()
     {
-        var num = new Random().Next(_maxNum + 1);
-        var tries = 0;
         var lastGuess = -1;
         
-        while (lastGuess != num && tries < _maxTries)
+        while (lastGuess != _settings.MaxNumber && _settings.MaxTries != 0)
         {
             if (!int.TryParse(Console.ReadLine(), out lastGuess))
             {
@@ -40,17 +36,17 @@ public class Guess : IView
                 continue;
             }
 
-            if (lastGuess == num)
+            if (lastGuess == _settings.MaxNumber)
             {
                 _printer.Print("Поздравляю! Ты угадал число =)");
                 break;
             }
 
-            _printer.Print(lastGuess < num ? "Мое число больше..." : "Мое число меньше...");
+            _printer.Print(lastGuess < _settings.MaxNumber ? "Мое число больше..." : "Мое число меньше...");
 
-            tries++;
+            _settings.MaxTries--;
 
-            if (tries != _maxTries) continue;
+            if (_settings.MaxTries != 0) continue;
             
             _printer.Print("Ты проиграл.");
             break;
